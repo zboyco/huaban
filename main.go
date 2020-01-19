@@ -6,7 +6,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/zboyco/pachong/model"
+	"github.com/zboyco/huaban/model"
 	"io"
 	"io/ioutil"
 	"log"
