@@ -14,6 +14,7 @@ import (
 )
 
 func main() {
+
 	fmt.Println("***********************告知**********************\n")
 	for i := 0; i < 3; i++ {
 		fmt.Println("          程序运行过程中，请勿关闭该窗口          \n")
@@ -27,24 +28,26 @@ func main() {
 		startWeb()
 	}()
 
-	for i := 5; i > 0; i-- {
-		fmt.Println(fmt.Sprintf("程序将在%v秒后打开界面...", i))
-		time.Sleep(time.Second)
-	}
+	go func() {
+		for i := 5; i > 0; i-- {
+			fmt.Println(fmt.Sprintf("程序将在%v秒后打开界面...", i))
+			time.Sleep(time.Second)
+		}
 
-	fmt.Println("正在打开网页，如果没有自动打开，请手动打开此网页： http://localhost:9010\n")
+		fmt.Println("\n正在打开网页，如果没有自动打开，请手动打开此网页： http://localhost:9010\n")
 
-	err := browser.OpenURL("http://localhost:9010")
-	if err != nil {
-		log.Fatal(err)
-	}
+		err := browser.OpenURL("http://localhost:9010")
+		if err != nil {
+			log.Fatal(err)
+		}
+	}()
 
 	wg.Wait()
 }
 
 func startWeb() {
 	gin.SetMode(gin.ReleaseMode)
-	//gin.DefaultWriter = os.Stdout
+
 	r := gin.Default()
 	r.LoadHTMLGlob("index.html")
 
@@ -55,17 +58,6 @@ func startWeb() {
 	var cancel context.CancelFunc
 
 	r.POST("/api/start", func(c *gin.Context) {
-		//data, err := ioutil.ReadAll(c.Request.Body)
-		//if err != nil {
-		//	c.JSON(http.StatusBadRequest, nil)
-		//	return
-		//}
-		//urlString := string(data)
-		//urlString, err = url.PathUnescape(urlString[1:])
-		//if err != nil {
-		//	c.JSON(http.StatusBadRequest, nil)
-		//	return
-		//}
 		body := &model.Body{}
 		err := c.BindJSON(body)
 		if err != nil {
@@ -97,5 +89,8 @@ func startWeb() {
 		c.HTML(http.StatusOK, "index.html", nil)
 	})
 
-	r.Run(":9010")
+	err := r.Run(":9010")
+	if err != nil {
+		fmt.Print(err)
+	}
 }

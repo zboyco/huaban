@@ -105,7 +105,7 @@
                 if (run) {
                     var result = JSON.parse(response);
                     for (i in result.msgs) {
-                        if (result.msgs[i].indexOf("文件夹") >= 0) {
+                        if (result.msgs[i].indexOf("路径") >= 0) {
                             path.innerText = result.msgs[i];
                         } else if (result.msgs[i].indexOf("结束") >= 0) {
                             stop();
@@ -134,6 +134,7 @@
     }
 
     function start() {
+        url.disabled = true;
         startBtn.style.display = "none";
         stopBtn.style.display = "block";
         if (clearTimer !== null) {
@@ -159,6 +160,7 @@
     }
 
     function stop() {
+        url.disabled = false;
         stopBtn.style.display = "none";
         startBtn.style.display = "block";
         clearTimer = setTimeout(function () {
