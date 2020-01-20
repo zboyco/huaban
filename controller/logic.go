@@ -71,7 +71,7 @@ func getImageLinks(ctx context.Context, q chan<- *model.Pin, board *model.Board,
 				lastPinID = board.Pins[i].PinID
 			}
 
-			interval := rand.Intn(800) + 1600
+			interval := rand.Intn(200) + 800
 			time.Sleep(time.Millisecond * time.Duration(interval))
 
 			board, err = getNextPage(board.BoardID, lastPinID)
@@ -119,7 +119,7 @@ func download(ctx context.Context, q <-chan *model.Pin, dirName string, message 
 					message.Add(fmt.Sprintf("%v   --------->   %v 保存成功...", count, pin.PinID))
 				}
 
-				interval := rand.Intn(600) + 800
+				interval := rand.Intn(200) + 200
 				time.Sleep(time.Millisecond * time.Duration(interval))
 			} else {
 				//fmt.Println(pin.PinID, "该采集待公开...")
