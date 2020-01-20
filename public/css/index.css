@@ -1,0 +1,49 @@
+.top {
+    position: fixed;
+    top: 0;
+    left: 30px;
+    right: 30px;
+    height: 160px;
+    border-bottom: 1px solid gray;
+    padding-bottom: 26px;
+    margin-bottom: 26px;
+    background-color: white;
+}
+
+.input-url {
+    height: 30px;
+    width: 360px;
+    padding: 5px 10px;
+}
+
+.btn-start {
+    position: absolute;
+    top:85px;
+    left: 383px;
+    height: 44px;
+    padding: 5px 10px;
+    font-size: 20px;
+    line-height: 20px;
+}
+
+.btn-stop {
+    position: absolute;
+    top:85px;
+    left: 383px;
+    height: 44px;
+    padding: 5px 10px;
+    font-size: 20px;
+    line-height: 20px;
+
+    display: none;
+}
+
+.list {
+    padding: 50px;
+    margin-top: 160px;
+}
+
+.list > p {
+    margin: 5px 0;
+    line-height: 20px;
+}

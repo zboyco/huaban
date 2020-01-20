@@ -5,10 +5,10 @@ type PageJson struct {
 }
 
 type Board struct {
-	BoardID int    `json:"board_id"`
-	Title   string `json:"title"`
-	Pins    []*Pin `json:"pins"`
-	PinCount int `json:"pin_count"`
+	BoardID  int    `json:"board_id"`
+	Title    string `json:"title"`
+	Pins     []*Pin `json:"pins"`
+	PinCount int    `json:"pin_count"`
 }
 
 type Pin struct {
