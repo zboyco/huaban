@@ -7,17 +7,18 @@ import (
 	"github.com/pkg/browser"
 	"github.com/zboyco/huaban/controller"
 	"github.com/zboyco/huaban/model"
-	"io/ioutil"
 	"log"
 	"net/http"
-	"net/url"
 	"sync"
+	"time"
 )
 
 func main() {
-	for i:= 0 ; i < 3;i++ {
-		fmt.Println("告知：程序运行过程中，请勿关闭该窗口...\n")
+	fmt.Println("***********************告知**********************\n")
+	for i := 0; i < 3; i++ {
+		fmt.Println("          程序运行过程中，请勿关闭该窗口          \n")
 	}
+	fmt.Println("***********************告知**********************\n")
 
 	var wg sync.WaitGroup
 	wg.Add(1)
@@ -25,6 +26,11 @@ func main() {
 		defer wg.Done()
 		startWeb()
 	}()
+
+	for i := 5; i > 0; i-- {
+		fmt.Println(fmt.Sprintf("程序将在%v秒后打开界面...", i))
+		time.Sleep(time.Second)
+	}
 
 	fmt.Println("正在打开网页，如果没有自动打开，请手动打开此网页： http://localhost:9010\n")
 
@@ -38,9 +44,9 @@ func main() {
 
 func startWeb() {
 	gin.SetMode(gin.ReleaseMode)
+	//gin.DefaultWriter = os.Stdout
 	r := gin.Default()
-	r.Static("/static", "public")
-	r.LoadHTMLGlob("templates/*")
+	r.LoadHTMLGlob("index.html")
 
 	msg := &model.Message{}
 	msg.Reset()
@@ -49,21 +55,28 @@ func startWeb() {
 	var cancel context.CancelFunc
 
 	r.POST("/api/start", func(c *gin.Context) {
-		data, err := ioutil.ReadAll(c.Request.Body)
+		//data, err := ioutil.ReadAll(c.Request.Body)
+		//if err != nil {
+		//	c.JSON(http.StatusBadRequest, nil)
+		//	return
+		//}
+		//urlString := string(data)
+		//urlString, err = url.PathUnescape(urlString[1:])
+		//if err != nil {
+		//	c.JSON(http.StatusBadRequest, nil)
+		//	return
+		//}
+		body := &model.Body{}
+		err := c.BindJSON(body)
 		if err != nil {
 			c.JSON(http.StatusBadRequest, nil)
 			return
 		}
-		urlString := string(data)
-		urlString, err = url.PathUnescape(urlString[1:])
-		if err != nil {
-			c.JSON(http.StatusBadRequest, nil)
-			return
-		}
+
 		userAgent := c.Request.Header.Get("User-Agent")
 		msg.Reset()
 		ctx, cancel = context.WithCancel(context.Background())
-		go controller.StartDownload(ctx, urlString, userAgent, msg)
+		go controller.StartDownload(ctx, body.Url, userAgent, msg)
 		c.JSON(http.StatusOK, nil)
 	})
 	r.POST("/api/pause", func(c *gin.Context) {

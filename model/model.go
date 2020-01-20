@@ -20,3 +20,7 @@ type Pin struct {
 	} `json:"file"`
 	Trusted bool `json:"trusted"`
 }
+
+type Body struct {
+	Url string `json:"url"`
+}

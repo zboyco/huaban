@@ -14,6 +14,7 @@ import (
 	"math/rand"
 	"net/http"
 	"os"
+	"path/filepath"
 	"regexp"
 	"strings"
 	"sync"
@@ -34,7 +35,10 @@ func StartDownload(ctx context.Context, url, userAgent string, message *model.Me
 	if err != nil && os.IsNotExist(err) {
 		log.Fatal(err)
 	}
-	message.Add(fmt.Sprintf("下载文件将保存在【%v】文件夹中", board.Title))
+
+	path, _ := filepath.Abs(filepath.Dir(board.Title))
+
+	message.Add(fmt.Sprintf("图片将保存在【%v\\%v】文件夹。", path, board.Title))
 
 	q := make(chan *model.Pin, 10)
 	var wg sync.WaitGroup
@@ -99,27 +103,27 @@ func download(ctx context.Context, q <-chan *model.Pin, dirName string, message 
 			}
 			count++
 			fmt.Print(count)
-			fmt.Print(" >>> ")
+			fmt.Print(" ---------> ")
 			if pin.Trusted {
 				err := downloadImage(dirName, pin)
 				if os.IsExist(err) {
 					fmt.Println(pin.PinID, "已存在,跳过...")
-					message.Add(fmt.Sprintf("%v >>> %v 已存在,跳过...", count, pin.PinID))
+					message.Add(fmt.Sprintf("%v ---------> %v 已存在,跳过...", count, pin.PinID))
 					continue
 				}
 				if err != nil {
 					fmt.Println(pin.PinID, err)
-					message.Add(fmt.Sprintf("%v >>> %v %v", count, pin.PinID, err))
+					message.Add(fmt.Sprintf("%v ---------> %v %v", count, pin.PinID, err))
 				} else {
 					fmt.Println(pin.PinID, "保存成功...", )
-					message.Add(fmt.Sprintf("%v >>> %v 保存成功...", count, pin.PinID))
+					message.Add(fmt.Sprintf("%v ---------> %v 保存成功...", count, pin.PinID))
 				}
 
 				interval := rand.Intn(600) + 800
 				time.Sleep(time.Millisecond * time.Duration(interval))
 			} else {
 				fmt.Println(pin.PinID, "该采集待公开...")
-				message.Add(fmt.Sprintf("%v >>> %v 该采集待公开...", count, pin.PinID))
+				message.Add(fmt.Sprintf("%v ---------> %v 该采集待公开...", count, pin.PinID))
 			}
 		}
 	}
