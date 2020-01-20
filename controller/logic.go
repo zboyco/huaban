@@ -16,6 +16,7 @@ import (
 	"os"
 	"regexp"
 	"strings"
+	"sync"
 	"time"
 )
 
@@ -23,6 +24,7 @@ var userAgent string
 
 func StartDownload(ctx context.Context, url, userAgent string, message *model.Message) {
 	userAgent = userAgent
+
 	board, err := getIndexPage(url)
 	if err != nil {
 		log.Fatal(err)
@@ -34,61 +36,89 @@ func StartDownload(ctx context.Context, url, userAgent string, message *model.Me
 	}
 	message.Add(fmt.Sprintf("下载文件将保存在【%v】文件夹中", board.Title))
 
-	interval := rand.Intn(600) + 800
-	time.Sleep(time.Millisecond * time.Duration(interval))
+	q := make(chan *model.Pin, 10)
+	var wg sync.WaitGroup
+	wg.Add(2)
 
-	count := 0
+	go func() {
+		defer wg.Done()
+		defer close(q)
+		getImageLinks(ctx, q, board, message)
+	}()
+
+	go func() {
+		defer wg.Done()
+		download(ctx, q, board.Title, message)
+	}()
+
+	wg.Wait()
+}
+
+func getImageLinks(ctx context.Context, q chan<- *model.Pin, board *model.Board, message *model.Message) {
+	var err error
 	lastPinID := 0
-Start:
 	for {
-		for _, pin := range board.Pins {
+		select {
+		case <-ctx.Done():
+			return
+		default:
+			for i := range board.Pins {
+				q <- board.Pins[i]
+				lastPinID = board.Pins[i].PinID
+			}
 
-			select {
-			case <-ctx.Done():
-				message.Add("用户主动停止下载...")
-				break Start
-			default:
-				count++
-				lastPinID = pin.PinID
-				fmt.Print(count)
-				fmt.Print(" >>> ")
-				if pin.Trusted {
-					err := downloadImage(board.Title, pin)
-					if os.IsExist(err) {
-						fmt.Println(pin.PinID, "已存在,跳过...")
-						message.Add(fmt.Sprintf("%v >>> %v 已存在,跳过...", count, pin.PinID))
-						continue
-					}
-					if err != nil {
-						fmt.Println(pin.PinID, err)
-						message.Add(fmt.Sprintf("%v >>> %v %v", count, pin.PinID, err))
-					} else {
-						fmt.Println(pin.PinID, "保存成功...", )
-						message.Add(fmt.Sprintf("%v >>> %v 保存成功...", count, pin.PinID))
-					}
-					interval := rand.Intn(600) + 800
-					time.Sleep(time.Millisecond * time.Duration(interval))
-				} else {
-					fmt.Println(pin.PinID, "该采集待公开...")
-					message.Add(fmt.Sprintf("%v >>> %v 该采集待公开...", count, pin.PinID))
-				}
+			board, err = getNextPage(board.BoardID, lastPinID)
+			if err != nil {
+				message.Add(err.Error())
+				log.Println(err)
+				return
+			}
+
+			if len(board.Pins) == 0 {
+				return
 			}
 		}
-		if count >= board.PinCount {
-			break
-		}
+	}
+}
 
-		board, err = getNextPage(board.BoardID, lastPinID)
-		if err != nil {
-			log.Fatal(err)
-		}
+func download(ctx context.Context, q <-chan *model.Pin, dirName string, message *model.Message) {
+	count := 0
+	for {
+		select {
+		case <-ctx.Done():
+			message.Add("用户主动停止下载...")
+			return
+		default:
+			pin, ok := <-q
+			if !ok {
+				message.Add("结束：该画板下载完成...")
+				return
+			}
+			count++
+			fmt.Print(count)
+			fmt.Print(" >>> ")
+			if pin.Trusted {
+				err := downloadImage(dirName, pin)
+				if os.IsExist(err) {
+					fmt.Println(pin.PinID, "已存在,跳过...")
+					message.Add(fmt.Sprintf("%v >>> %v 已存在,跳过...", count, pin.PinID))
+					continue
+				}
+				if err != nil {
+					fmt.Println(pin.PinID, err)
+					message.Add(fmt.Sprintf("%v >>> %v %v", count, pin.PinID, err))
+				} else {
+					fmt.Println(pin.PinID, "保存成功...", )
+					message.Add(fmt.Sprintf("%v >>> %v 保存成功...", count, pin.PinID))
+				}
 
-		if len(board.Pins) == 0 {
-			break
+				interval := rand.Intn(600) + 800
+				time.Sleep(time.Millisecond * time.Duration(interval))
+			} else {
+				fmt.Println(pin.PinID, "该采集待公开...")
+				message.Add(fmt.Sprintf("%v >>> %v 该采集待公开...", count, pin.PinID))
+			}
 		}
-
-		interval := rand.Intn(600) + 800
-		time.Sleep(time.Millisecond * time.Duration(interval))
 	}
 }
 

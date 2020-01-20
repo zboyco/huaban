@@ -43,7 +43,8 @@ func startWeb() {
 	msg := &model.Message{}
 	msg.Reset()
 
-	ctx, cancel := context.WithCancel(context.Background())
+	var ctx context.Context
+	var cancel context.CancelFunc
 
 	r.POST("/api/start", func(c *gin.Context) {
 		data, err := ioutil.ReadAll(c.Request.Body)
@@ -59,6 +60,7 @@ func startWeb() {
 		}
 		userAgent := c.Request.Header.Get("User-Agent")
 		msg.Reset()
+		ctx, cancel = context.WithCancel(context.Background())
 		go controller.StartDownload(ctx, urlString, userAgent, msg)
 		c.JSON(http.StatusOK, nil)
 	})
