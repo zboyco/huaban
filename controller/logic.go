@@ -67,6 +67,9 @@ func getImageLinks(ctx context.Context, q chan<- *model.Pin, board *model.Board,
 				lastPinID = board.Pins[i].PinID
 			}
 
+			interval := rand.Intn(800) + 1600
+			time.Sleep(time.Millisecond * time.Duration(interval))
+
 			board, err = getNextPage(board.BoardID, lastPinID)
 			if err != nil {
 				message.Add(err.Error())

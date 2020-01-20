@@ -45,6 +45,10 @@
 
                         t = document.body.clientHeight;
                         window.scroll({top: t, left: 0, behavior: 'smooth'});
+
+                        if (result.msgs[i].indexOf("下载完成") >= 0) {
+                            stop();
+                        }
                     }
                 }
                 if (run) {

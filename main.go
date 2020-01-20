@@ -15,6 +15,9 @@ import (
 )
 
 func main() {
+	for i:= 0 ; i < 3;i++ {
+		fmt.Println("告知：程序运行过程中，请勿关闭该窗口...\n")
+	}
 
 	var wg sync.WaitGroup
 	wg.Add(1)
@@ -22,14 +25,13 @@ func main() {
 		defer wg.Done()
 		startWeb()
 	}()
-	fmt.Println("正在打开网页 http://localhost:9010")
+
+	fmt.Println("正在打开网页，如果没有自动打开，请手动打开此网页： http://localhost:9010\n")
 
 	err := browser.OpenURL("http://localhost:9010")
 	if err != nil {
 		log.Fatal(err)
 	}
-
-	fmt.Println("程序运行过程中，请勿关闭该窗口...")
 
 	wg.Wait()
 }
