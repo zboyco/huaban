@@ -4,11 +4,12 @@ import (
 	"context"
 	"fmt"
 	"github.com/gin-gonic/gin"
-	"github.com/pkg/browser"
 	"github.com/zboyco/huaban/controller"
 	"github.com/zboyco/huaban/model"
 	"log"
 	"net/http"
+	"os/exec"
+	"runtime"
 	"sync"
 	"time"
 )
@@ -36,7 +37,7 @@ func main() {
 
 		fmt.Println("\n正在打开网页，如果没有自动打开，请手动打开此网页： http://localhost:9010\n")
 
-		err := browser.OpenURL("http://localhost:9010")
+		err := open("http://localhost:9010")
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -93,4 +94,21 @@ func startWeb() {
 	if err != nil {
 		fmt.Print(err)
 	}
+}
+
+func open(url string) error {
+	var cmd string
+	var args []string
+
+	switch runtime.GOOS {
+	case "windows":
+		cmd = "cmd"
+		args = []string{"/c", "start"}
+	case "darwin":
+		cmd = "open"
+	default: // "linux", "freebsd", "openbsd", "netbsd"
+		cmd = "xdg-open"
+	}
+	args = append(args, url)
+	return exec.Command(cmd, args...).Start()
 }

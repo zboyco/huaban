@@ -189,6 +189,13 @@
     }
 
     function start() {
+        if(url.value == ""){
+            list.innerHTML += '<p style="color: red">请填入画板链接后再开始...</p>';
+            t = document.body.clientHeight;
+            window.scroll({top: t, left: 0, behavior: 'smooth'});
+            return
+        }
+
         url.disabled = true;
         startBtn.style.display = "none";
         stopBtn.style.display = "block";
