@@ -31,14 +31,16 @@ func StartDownload(ctx context.Context, url, userAgent string, message *model.Me
 		log.Fatal(err)
 	}
 
-	err = os.Mkdir(fmt.Sprintf("./%v", board.Title), os.ModePerm)
+	dirName := fmt.Sprintf("%v(%v)", board.Title, board.BoardID)
+
+	err = os.Mkdir(fmt.Sprintf("./%v", dirName), os.ModePerm)
 	if err != nil && os.IsNotExist(err) {
 		log.Fatal(err)
 	}
 
-	path, _ := filepath.Abs(filepath.Dir(board.Title))
+	path, _ := filepath.Abs(filepath.Dir(dirName))
 
-	message.Add(fmt.Sprintf("图片保存路径:【%v\\%v】。", path, board.Title))
+	message.Add(fmt.Sprintf("图片保存路径:【%v\\%v】", path, dirName))
 
 	q := make(chan *model.Pin, 10)
 	var wg sync.WaitGroup
@@ -52,7 +54,7 @@ func StartDownload(ctx context.Context, url, userAgent string, message *model.Me
 
 	go func() {
 		defer wg.Done()
-		download(ctx, q, board.Title, message)
+		download(ctx, q, dirName, message)
 	}()
 
 	wg.Wait()

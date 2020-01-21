@@ -79,7 +79,7 @@
 
         .donate-block {
             position: fixed;
-            background-color: rgba(0, 0, 0, .5);
+            background-color: rgba(0, 0, 0, .8);
             top: 0;
             left: 0;
             right: 0;
@@ -87,9 +87,33 @@
             display: none;
         }
 
-        .img{
-
+        .title {
+            position: absolute;
+            top: 70px;
+            width: 100%;
+            color: whitesmoke;
+            font-size: 42px;
+            text-align: center;
         }
+
+        .img {
+            position: absolute;
+            width: 775px;
+            height: 477px;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        .info {
+            position: absolute;
+            bottom: 90px;
+            width: 100%;
+            color: coral;
+            font-size: 22px;
+            text-align: center;
+        }
+
     </style>
 </head>
 
@@ -97,17 +121,19 @@
 <div>
     <div class="top">
         <h1>花瓣网画板下载工具</h1>
-        <div class="donate" onclick="show()">打赏作者</div>
+        <div class="donate" onclick="show()">捐赠打赏</div>
         <input id="url" class="input-url" type="text" value="" placeholder="请填入花瓣网画板地址"/>
         <input id="startBtn" class="btn-start" type="button" value="开始" onclick="start()"/>
         <input id="stopBtn" class="btn-stop" type="button" value="停止" onclick="stop()"/>
         <div class="tips">
             <p>请在上方填入花瓣网画板地址，点击【开始】按钮开始下载。</p>
-            <p id="path">图片将会保存在该程序目录（刚刚你打开的那个）下以画板命名的文件夹中。</p>
+            <p id="path">图片将会保存在该程序所在目录下以画板命名的文件夹中。</p>
         </div>
     </div>
     <div id="donate" class="donate-block" onclick="hide()">
-
+        <div class="title">捐赠打赏</div>
+        <img class="img" src="https://raw.githubusercontent.com/zboyco/imgs/master/qr.png"/>
+        <div class="info">如果您觉得这个工具用起来还不错，方便了您，节约了时间<br/>不妨打赏一下，这样我们就有更大的动力去完善它，优化它</div>
     </div>
     <div id="list" class="list">
     </div>
