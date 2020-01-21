@@ -49,7 +49,7 @@ func startWeb() {
 	gin.SetMode(gin.ReleaseMode)
 
 	r := gin.Default()
-	r.LoadHTMLGlob("index.html")
+	r.LoadHTMLGlob("ui.html")
 
 	msg := &model.Message{}
 	msg.Reset()
@@ -86,7 +86,7 @@ func startWeb() {
 		})
 	})
 	r.GET("/", func(c *gin.Context) {
-		c.HTML(http.StatusOK, "index.html", nil)
+		c.HTML(http.StatusOK, "ui.html", nil)
 	})
 
 	err := r.Run(":9010")
