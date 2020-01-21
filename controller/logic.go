@@ -40,7 +40,7 @@ func StartDownload(ctx context.Context, url, userAgent string, message *model.Me
 
 	path, _ := filepath.Abs(filepath.Dir(dirName))
 
-	message.Add(fmt.Sprintf("图片保存路径:【%v\\%v】", path, dirName))
+	message.Add(fmt.Sprintf("本次下载图片保存路径:【%v\\%v】", path, dirName))
 
 	q := make(chan *model.Pin, 10)
 	var wg sync.WaitGroup

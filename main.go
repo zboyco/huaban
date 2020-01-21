@@ -14,6 +14,8 @@ import (
 	"time"
 )
 
+const uiName string = "ui.html"
+
 func main() {
 
 	fmt.Println("***********************告知**********************\n")
@@ -50,7 +52,7 @@ func startWeb() {
 	gin.SetMode(gin.ReleaseMode)
 
 	r := gin.Default()
-	r.LoadHTMLGlob("ui.html")
+	r.LoadHTMLGlob(uiName)
 
 	msg := &model.Message{}
 	msg.Reset()
@@ -87,7 +89,7 @@ func startWeb() {
 		})
 	})
 	r.GET("/", func(c *gin.Context) {
-		c.HTML(http.StatusOK, "ui.html", nil)
+		c.HTML(http.StatusOK, uiName, nil)
 	})
 
 	err := r.Run(":9010")
