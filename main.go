@@ -6,7 +6,6 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/zboyco/huaban/controller"
 	"github.com/zboyco/huaban/model"
-	"log"
 	"net/http"
 	"os/exec"
 	"runtime"
@@ -18,11 +17,11 @@ const uiName string = "ui.html"
 
 func main() {
 
-	fmt.Println("***********************告知**********************\n")
+	fmt.Println("***********************告知***********************\n")
 	for i := 0; i < 3; i++ {
 		fmt.Println("          程序运行过程中，请勿关闭该窗口          \n")
 	}
-	fmt.Println("***********************告知**********************\n")
+	fmt.Println("***********************告知***********************\n")
 
 	var wg sync.WaitGroup
 	wg.Add(1)
@@ -33,7 +32,7 @@ func main() {
 
 	go func() {
 		for i := 5; i > 0; i-- {
-			fmt.Println(fmt.Sprintf("程序将在%v秒后打开界面...", i))
+			fmt.Println(fmt.Sprintf("将在%v秒后打开界面...", i))
 			time.Sleep(time.Second)
 		}
 
@@ -41,15 +40,25 @@ func main() {
 
 		err := open("http://localhost:9010")
 		if err != nil {
-			log.Fatal(err)
+			fmt.Println(err)
 		}
 	}()
+
+	time.Sleep(6 * time.Second)
+
+	fmt.Println("***********************告知***********************\n")
+	for i := 0; i < 3; i++ {
+		fmt.Println("          程序运行过程中，请勿关闭该窗口          \n")
+	}
+	fmt.Println("***********************告知***********************\n")
 
 	wg.Wait()
 }
 
 func startWeb() {
 	gin.SetMode(gin.ReleaseMode)
+
+	gin.DefaultWriter = model.NilWriter{}
 
 	r := gin.Default()
 	r.LoadHTMLGlob(uiName)

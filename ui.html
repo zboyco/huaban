@@ -160,7 +160,7 @@
             <p>请在上方填入花瓣网画板地址，点击【开始】按钮开始下载。</p>
             <p>下载的图片保存在该程序所在目录下以画板命名的文件夹中。</p>
             <h3 style="margin-top: 30px;">图片下载列表（<span id="progress">0</span>/<span
-                        id="totalCount">0</span>）其中待公开数：<span id="lockedCount">0</span></h3>
+                        id="totalCount">0</span>）待公开数：<span id="lockedCount">0</span></h3>
         </div>
     </div>
 
@@ -220,6 +220,7 @@
                     } else if (result.msgs[i].indexOf('结束') >= 0) {
                         stop();
                         innerHTML += '<p style="color: blue">' + result.msgs[i] + '</p>';
+                        totalCount.innerHTML = count;
                     } else if (result.msgs[i].indexOf('停止') >= 0) {
                         innerHTML += '<p style="color: red">' + result.msgs[i] + '</p>';
                     } else {
