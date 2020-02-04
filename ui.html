@@ -159,7 +159,8 @@
             <p id="path">&nbsp;</p>
             <p>请在上方填入花瓣网画板地址，点击【开始】按钮开始下载。</p>
             <p>下载的图片保存在该程序所在目录下以画板命名的文件夹中。</p>
-            <h3 style="margin-top: 30px;">图片下载列表</h3>
+            <h3 style="margin-top: 30px;">图片下载列表（<span id="progress">0</span>/<span
+                        id="totalCount">0</span>）其中待公开数：<span id="lockedCount">0</span></h3>
         </div>
     </div>
 
@@ -178,7 +179,9 @@
 <div id="list" class="list"></div>
 </body>
 <script>
-    let timer = null,
+    let xhr = null,
+        count = 0,
+        locked = 0,
         clearTimer = null,
         run = false,
         t = null;
@@ -190,6 +193,9 @@
     const path = document.querySelector('#path');
     const donate = document.querySelector('#donate');
     const smallDonate = document.querySelector('#small-donate');
+    const totalCount = document.querySelector("#totalCount");
+    const progress = document.querySelector("#progress");
+    const lockedCount = document.querySelector("#lockedCount");
 
     startBtn.addEventListener('click', start, false);
     stopBtn.addEventListener('click', stop, false);
@@ -198,49 +204,69 @@
 
 
     function getData() {
-        clearTimeout(timer);
         ajax({
             url: '/api/message', //请求地址
             type: 'GET', //请求方式
             data: {}, //请求参数
             dataType: 'json',
             success: function (response, xml) {
-                if (run) {
-                    var result = JSON.parse(response);
-                    for (i in result.msgs) {
-                        if (result.msgs[i].indexOf('路径') >= 0) {
-                            path.innerHTML = '<span style="color: blue">' + result.msgs[i] + '</span>';
-                        } else if (result.msgs[i].indexOf('结束') >= 0) {
-                            stop();
-                            list.innerHTML += '<p style="color: blue">' + result.msgs[i] + '</p>';
-                        } else if (result.msgs[i].indexOf('停止') >= 0) {
-                            list.innerHTML += '<p style="color: red">' + result.msgs[i] + '</p>';
-                        } else {
-                            list.innerHTML += '<p>' + result.msgs[i] + '</p>';
-                        }
+                let result = JSON.parse(response);
+                let innerHTML = "";
+                for (i in result.msgs) {
+                    if (result.msgs[i].indexOf('路径') >= 0) {
+                        path.innerHTML = '<span style="color: blue">' + result.msgs[i] + '</span>';
+                    } else if (result.msgs[i].indexOf('总采集数：') >= 0) {
+                        totalCount.innerHTML = result.msgs[i].substring(5);
+                    } else if (result.msgs[i].indexOf('结束') >= 0) {
+                        stop();
+                        innerHTML += '<p style="color: blue">' + result.msgs[i] + '</p>';
+                    } else if (result.msgs[i].indexOf('停止') >= 0) {
+                        innerHTML += '<p style="color: red">' + result.msgs[i] + '</p>';
+                    } else {
+                        innerHTML += '<p>' + result.msgs[i] + '</p>';
+                        count++;
 
-                        t = document.body.scrollHeight;
-                        window.scroll({top: t, left: 0, behavior: 'smooth'});
+                        if (result.msgs[i].indexOf('待公开') >= 0) {
+                            locked++;
+                        }
                     }
                 }
+                if (innerHTML !== "") {
+                    list.innerHTML += innerHTML;
+
+                    t = document.body.scrollHeight;
+                    window.scroll({top: t, left: 0, behavior: 'smooth'});
+
+                    progress.innerHTML = count;
+                    lockedCount.innerHTML = locked;
+                }
+
                 if (run) {
-                    timer = setTimeout(getData, 300);
+                    setTimeout(getData, 300);
                 }
             },
             fail: function (status) {
                 // 此处放失败后执行的代码
                 if (run) {
-                    timer = setTimeout(getData, 300);
+                    setTimeout(getData, 300);
                 }
             }
         });
     }
 
     function start() {
+        list.innerHTML = "";
+        totalCount.innerHTML = "0";
+        count = 0;
+        locked = 0;
+        progress.innerHTML = count;
+        lockedCount.innerHTML = locked;
+
         if (url.value == '') {
             path.innerHTML = '<span style="color: red">请填入画板链接后再开始...</span>';
             return;
         }
+
 
         url.disabled = true;
         startBtn.style.display = 'none';
@@ -257,7 +283,7 @@
             dataType: 'json',
             success: function (response, xml) {
                 run = true;
-                timer = setTimeout(getData, 1);
+                setTimeout(getData, 1);
             },
             fail: function (status) {
                 list.innerHTML += '<p>' + '开始失败!' + '</p>';
@@ -273,10 +299,8 @@
         startBtn.style.display = 'block';
         clearTimer = setTimeout(function () {
             run = false;
-            if (timer !== null) {
-                clearTimeout(timer);
-            }
-        }, 2000);
+            clearTimer = null;
+        }, 610);
         ajax({
             url: '/api/stop', //请求地址
             type: 'POST', //请求方式
@@ -285,17 +309,20 @@
         });
     }
 
+
     function ajax(options) {
         options = options || {};
         options.type = (options.type || 'GET').toUpperCase();
         options.dataType = options.dataType || 'json';
 
         //创建 - 非IE6 - 第一步
-        if (window.XMLHttpRequest) {
-            var xhr = new XMLHttpRequest();
-        } else {
-            //IE6及其以下版本浏览器
-            var xhr = new ActiveXObject('Microsoft.XMLHTTP');
+        if (xhr === null) {
+            if (window.XMLHttpRequest) {
+                xhr = new XMLHttpRequest();
+            } else {
+                //IE6及其以下版本浏览器
+                xhr = new ActiveXObject('Microsoft.XMLHTTP');
+            }
         }
 
         //接收 - 第三步

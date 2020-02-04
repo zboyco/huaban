@@ -41,6 +41,7 @@ func StartDownload(ctx context.Context, url, userAgent string, message *model.Me
 	path, _ := filepath.Abs(filepath.Dir(dirName))
 
 	message.Add(fmt.Sprintf("本次下载图片保存路径:【%v\\%v】", path, dirName))
+	message.Add(fmt.Sprintf("总采集数：%v", board.PinCount))
 
 	q := make(chan *model.Pin, 10)
 	var wg sync.WaitGroup
@@ -97,8 +98,7 @@ func download(ctx context.Context, q <-chan *model.Pin, dirName string, message 
 		case <-ctx.Done():
 			message.Add("用户主动停止下载...")
 			return
-		default:
-			pin, ok := <-q
+		case pin, ok := <-q:
 			if !ok {
 				message.Add("结束：该画板下载完成...")
 				return
@@ -181,6 +181,7 @@ func httpGetPage(url string) ([]byte, error) {
 	request.Header.Add("Accept-Encoding", "gzip, deflate, br")
 	request.Header.Add("Accept-Language", "zh-CN,zh;q=0.9,en;q=0.8,en-GB;q=0.7,en-US;q=0.6")
 	request.Header.Add("Connection", "keep-alive")
+
 	request.Header.Add("Host", "huaban.com")
 	request.Header.Add("Cache-Control", "no-cache")
 	request.Header.Add("Sec-Fetch-Mode", "navigate")
