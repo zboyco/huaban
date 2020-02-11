@@ -69,6 +69,10 @@ func startWeb() {
 	var ctx context.Context
 	var cancel context.CancelFunc
 
+	r.GET("/ping", func(c *gin.Context) {
+		c.JSON(http.StatusOK, nil)
+	})
+
 	r.POST("/api/start", func(c *gin.Context) {
 		body := &model.Body{}
 		err := c.BindJSON(body)
