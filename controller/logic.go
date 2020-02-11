@@ -32,6 +32,10 @@ func StartDownload(ctx context.Context, url, userAgent string, message *model.Me
 	}
 
 	dirName := fmt.Sprintf("%v(%v)", board.Title, board.BoardID)
+	re, _ := regexp.Compile("[/\\\\:*\"<>|?]")
+	dirName = re.ReplaceAllString(dirName, "")
+	re, _ = regexp.Compile("\\s+")
+	dirName = re.ReplaceAllString(dirName, " ")
 
 	err = os.Mkdir(fmt.Sprintf("./%v", dirName), os.ModePerm)
 	if err != nil && os.IsNotExist(err) {
