@@ -100,7 +100,7 @@ func download(ctx context.Context, q <-chan *model.Pin, dirName string, message 
 	for {
 		select {
 		case <-ctx.Done():
-			message.Add("用户主动停止下载...")
+			//message.Add("用户主动停止下载...")
 			return
 		case pin, ok := <-q:
 			if !ok {
@@ -196,6 +196,9 @@ func httpGetPage(url string) ([]byte, error) {
 	client := http.Client{}
 
 	resp, err := client.Do(request)
+	if err != nil {
+		return nil, err
+	}
 	if resp.StatusCode != 200 {
 		return nil, errors.New("Status Code Not 200")
 	}
@@ -204,7 +207,7 @@ func httpGetPage(url string) ([]byte, error) {
 	var reader io.ReadCloser
 	switch resp.Header.Get("Content-Encoding") {
 	case "gzip":
-		reader, err = gzip.NewReader(resp.Body)
+		reader, _ = gzip.NewReader(resp.Body)
 		defer reader.Close()
 	default:
 		reader = resp.Body
@@ -236,6 +239,9 @@ func httpGetJson(url, referer string) ([]byte, error) {
 	client := http.Client{}
 
 	resp, err := client.Do(request)
+	if err != nil {
+		return nil, err
+	}
 	if resp.StatusCode != 200 {
 		return nil, errors.New("Status Code Not 200")
 	}
@@ -244,7 +250,7 @@ func httpGetJson(url, referer string) ([]byte, error) {
 	var reader io.ReadCloser
 	switch resp.Header.Get("Content-Encoding") {
 	case "gzip":
-		reader, err = gzip.NewReader(resp.Body)
+		reader, _ = gzip.NewReader(resp.Body)
 		defer reader.Close()
 	default:
 		reader = resp.Body
@@ -291,6 +297,9 @@ func downloadImage(dirName string, pin *model.Pin) error {
 	client := http.Client{}
 
 	resp, err := client.Do(request)
+	if err != nil {
+		return err
+	}
 	if resp.StatusCode != 200 {
 		return errors.New("Status Code Not 200")
 	}
@@ -299,7 +308,7 @@ func downloadImage(dirName string, pin *model.Pin) error {
 	var reader io.ReadCloser
 	switch resp.Header.Get("Content-Encoding") {
 	case "gzip":
-		reader, err = gzip.NewReader(resp.Body)
+		reader, _ = gzip.NewReader(resp.Body)
 		defer reader.Close()
 	default:
 		reader = resp.Body
